@@ -1,0 +1,13 @@
+{
+  "api": "http://taiga.example.com:9090/api/v1/",
+  "eventsUrl": "ws://taiga.example.com:9090/events",
+  "debug": false,
+  "publicRegisterEnabled": true,
+  "feedbackEnabled": true,
+  "privacyPolicyUrl": null,
+  "termsOfServiceUrl": null,
+  "maxUploadFileSize": null,
+  "contribPlugins": [],
+  "googleClientId": "1001690764128-dvsm2nitvgmdmlavih3cmi7r2elav4gg.apps.googleusercontent.com",
+  "loginFormType": "normal"
+}
