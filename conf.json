@@ -1,6 +1,6 @@
 {
-  "api": "http://taiga-back-u8sowkw8w4gk4ok0c4gow8co:8000/api/v1/",
-  "eventsUrl": "ws://taiga-events-u8sowkw8w4gk4ok0c4gow8co:8888/events",
+  "api": "http://taiga-back:8000/api/v1/",
+  "eventsUrl": "ws://taiga-events:8888/events",
   "debug": true,
   "publicRegisterEnabled": true,
   "feedbackEnabled": true,
