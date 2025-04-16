@@ -1,7 +1,7 @@
 {
-  "api": "http://taiga-back:8000/api/v1/",
-  "eventsUrl": "ws://taiga-events:8888/events",
-  "debug": true,
+  "api": "http://taiga.example.com:9090/api/v1/",
+  "eventsUrl": "ws://taiga.example.com:9090/events",
+  "debug": false,
   "publicRegisterEnabled": true,
   "feedbackEnabled": true,
   "privacyPolicyUrl": null,
