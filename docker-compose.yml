@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: taiga-nginx
     ports:
-      - '6666:80'
+      - '65432:80'
     networks:
       - taiga-network
     # Remove the volume mount that was causing issues
