@@ -1,16 +1,63 @@
 version: '3.8'
 
 services:
-  nginx:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: taiga-nginx
-    ports:
-      - '45314:80'
+  db:
+    image: 'postgres:13'
+    environment:
+      POSTGRES_DB: taiga
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 8sZ1gHvoFg3RYOUONIPP6UoJRqLTliGRDiZzuwCDd6haRSaDNB7vTcovvtaTBMzR
+    volumes:
+      - 'taiga-db-data:/var/lib/postgresql/data'
+    networks:
+      - taiga-network
+
+  redis:
+    image: 'redis:6'
+    networks:
+      - taiga-network
+
+  back:
+    image: 'taigaio/taiga-back:latest'
+    depends_on:
+      - db
+      - redis
+    environment:
+      POSTGRES_DB: taiga
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 8sZ1gHvoFg3RYOUONIPP6UoJRqLTliGRDiZzuwCDd6haRSaDNB7vTcovvtaTBMzR
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      TAIGA_SECRET_KEY: Y8o^j2Mv#r6@L1qZ&pXpR9z!UwT$kFbNc0EsBh4dgW*Jx7AYmC
+      TAIGA_SITES_SCHEME: http
+      TAIGA_SITES_DOMAIN: b00sog0wg4k0o4ooko40kc4c.95.217.187.120.sslip.io
+      EMAIL_BACKEND: console
+      TAIGA_ADMIN_USERNAME: admin
+      TAIGA_ADMIN_PASSWORD: admin_password
+      TAIGA_ADMIN_EMAIL: admin@example.com
+    volumes:
+      - 'taiga-media:/taiga-back/media'
+      - 'taiga-static:/taiga-back/static'
+    networks:
+      - taiga-network
+
+  front:
+    image: 'taigaio/taiga-front:latest'
+    depends_on:
+      - back
+    environment:
+      TAIGA_API_URL: 'http://back:8000/api/v1/'
+      TAIGA_WEBSOCKETS_URL: 'ws://back:8000/events'
     networks:
       - taiga-network
 
 networks:
   taiga-network:
     driver: bridge
+
+volumes:
+  taiga-db-data:
+  taiga-media:
+  taiga-static:
