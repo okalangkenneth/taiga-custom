@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: taiga-nginx
     ports:
-      - '80:80'
+      - '44556:80'
     networks:
       - taiga-network
 
