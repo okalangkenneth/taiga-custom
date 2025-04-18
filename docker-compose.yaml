@@ -67,23 +67,23 @@ services:
     networks:
       - taiga-network
 
-  # Main service that Coolify should focus on
+  # Use a custom build for nginx
   nginx:
-    image: 'nginx:alpine'
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
     container_name: taiga-nginx
     depends_on:
       - front
       - back
     ports:
       - "9000:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     restart: unless-stopped
     networks:
       - taiga-network
     labels:
       coolify.managed: "true"
-      coolify.default: "true"  # Mark this as the default service
+      coolify.default: "true"
 
 networks:
   taiga-network:
@@ -93,5 +93,4 @@ volumes:
   taiga-db-data:
   taiga-media:
   taiga-static:
-
   
