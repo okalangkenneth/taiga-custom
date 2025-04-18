@@ -42,9 +42,9 @@ services:
       # Taiga configuration
       TAIGA_SECRET_KEY: j5_e4atjh#mo)f9olk@i!jkk=7e5!$b(yd!v6*0rx$7bq(9lwl
       TAIGA_SITES_SCHEME: http
-      TAIGA_SITES_DOMAIN: http://n04co8w04ww0o8k4cgc8w0oc.95.217.187.120.sslip.io
-      TAIGA_MEDIA_URL: http://http://n04co8w04ww0o8k4cgc8w0oc.95.217.187.120.sslip.io/media/
-      TAIGA_STATIC_URL: http://http://n04co8w04ww0o8k4cgc8w0oc.95.217.187.120.sslip.io/static/
+      TAIGA_SITES_DOMAIN: "jn04co8w04ww0o8k4cgc8w0oc.95.217.187.120.sslip.io"
+      TAIGA_MEDIA_URL: "http://jn04co8w04ww0o8k4cgc8w0oc.95.217.187.120.sslip.io/media/"
+      TAIGA_STATIC_URL: "http://jn04co8w04ww0o8k4cgc8w0oc.95.217.187.120.sslip.io/static/"
       
       # Admin user (for first login)
       TAIGA_ADMIN_USERNAME: admin
@@ -72,22 +72,89 @@ services:
     restart: unless-stopped
     networks:
       - taiga-network
-    # This label tells Coolify to expose this service via the generated domain
     labels:
       coolify.enable: "true"
 
-  # Optional: A simple NGINX proxy to handle routing
+  # CHANGES to the nginx service:
   nginx:
     image: 'nginx:alpine'
     container_name: taiga-nginx
     depends_on:
       - front
       - back
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    # Remove the volume mount entirely
+    # volumes:
+    #   - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    # Instead, use a custom Dockerfile that copies the config
+    # Set the nginx config directly here using environment variables and a template
+    environment:
+      # We'll use this env var to signal this is a custom configuration
+      NGINX_CONFIG_TYPE: "taiga"
+    command: >
+      /bin/sh -c "echo 'server {
+          listen 80;
+          server_name _;
+          client_max_body_size 100M;
+
+          # Frontend
+          location / {
+              proxy_pass http://front:80;
+              proxy_set_header Host $$host;
+              proxy_set_header X-Real-IP $$remote_addr;
+              proxy_set_header X-Forwarded-For $$proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $$scheme;
+          }
+
+          # Backend API
+          location /api {
+              proxy_pass http://back:8000/api;
+              proxy_set_header Host $$host;
+              proxy_set_header X-Real-IP $$remote_addr;
+              proxy_set_header X-Forwarded-For $$proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $$scheme;
+          }
+
+          # Admin
+          location /admin {
+              proxy_pass http://back:8000/admin;
+              proxy_set_header Host $$host;
+              proxy_set_header X-Real-IP $$remote_addr;
+              proxy_set_header X-Forwarded-For $$proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $$scheme;
+          }
+
+          # Static files
+          location /static {
+              proxy_pass http://back:8000/static;
+              proxy_set_header Host $$host;
+              proxy_set_header X-Real-IP $$remote_addr;
+              proxy_set_header X-Forwarded-For $$proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $$scheme;
+          }
+
+          # Media files
+          location /media {
+              proxy_pass http://back:8000/media;
+              proxy_set_header Host $$host;
+              proxy_set_header X-Real-IP $$remote_addr;
+              proxy_set_header X-Forwarded-For $$proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $$scheme;
+          }
+
+          # WebSockets
+          location /events {
+              proxy_pass http://back:8000/events;
+              proxy_http_version 1.1;
+              proxy_set_header Upgrade $$http_upgrade;
+              proxy_set_header Connection \"upgrade\";
+              proxy_set_header Host $$host;
+              proxy_set_header X-Real-IP $$remote_addr;
+              proxy_set_header X-Forwarded-For $$proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $$scheme;
+          }
+      }' > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
     networks:
       - taiga-network
-    # This label tells Coolify this is the service to expose
     labels:
       coolify.enable: "true"
 
