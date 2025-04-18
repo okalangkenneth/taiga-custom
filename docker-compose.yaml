@@ -3,55 +3,93 @@ version: '3.8'
 services:
   db:
     image: 'postgres:13'
+    container_name: taiga-db
     environment:
       POSTGRES_DB: taiga
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 8sZ1gHvoFg3RYOUONIPP6UoJRqLTliGRDiZzuwCDd6haRSaDNB7vTcovvtaTBMzR
+      POSTGRES_PASSWORD: postgres123
     volumes:
       - 'taiga-db-data:/var/lib/postgresql/data'
+    restart: unless-stopped
     networks:
       - taiga-network
 
   redis:
     image: 'redis:6'
+    container_name: taiga-redis
+    restart: unless-stopped
     networks:
       - taiga-network
 
   back:
     image: 'taigaio/taiga-back:latest'
+    container_name: taiga-back
     depends_on:
       - db
       - redis
     environment:
+      # Database configuration
       POSTGRES_DB: taiga
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 8sZ1gHvoFg3RYOUONIPP6UoJRqLTliGRDiZzuwCDd6haRSaDNB7vTcovvtaTBMzR
+      POSTGRES_PASSWORD: postgres123
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
+      
+      # Redis configuration
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      TAIGA_SECRET_KEY: Y8o^j2Mv#r6@L1qZ&pXpR9z!UwT$kFbNc0EsBh4dgW*Jx7AYmC
+      
+      # Taiga configuration
+      TAIGA_SECRET_KEY: j5_e4atjh#mo)f9olk@i!jkk=7e5!$b(yd!v6*0rx$7bq(9lwl
       TAIGA_SITES_SCHEME: http
-      TAIGA_SITES_DOMAIN: b00sog0wg4k0o4ooko40kc4c.95.217.187.120.sslip.io
-      EMAIL_BACKEND: console
+      TAIGA_SITES_DOMAIN: ${AUTO_GENERATED_DOMAIN}
+      TAIGA_MEDIA_URL: http://${AUTO_GENERATED_DOMAIN}/media/
+      TAIGA_STATIC_URL: http://${AUTO_GENERATED_DOMAIN}/static/
+      
+      # Admin user (for first login)
       TAIGA_ADMIN_USERNAME: admin
-      TAIGA_ADMIN_PASSWORD: admin_password
+      TAIGA_ADMIN_PASSWORD: admin123
       TAIGA_ADMIN_EMAIL: admin@example.com
+      
+      # Email configuration (using console for development)
+      EMAIL_BACKEND: console
     volumes:
       - 'taiga-media:/taiga-back/media'
       - 'taiga-static:/taiga-back/static'
+    restart: unless-stopped
     networks:
       - taiga-network
 
   front:
     image: 'taigaio/taiga-front:latest'
+    container_name: taiga-front
     depends_on:
       - back
     environment:
+      # API connectivity (uses internal Docker network)
       TAIGA_API_URL: 'http://back:8000/api/v1/'
       TAIGA_WEBSOCKETS_URL: 'ws://back:8000/events'
+    restart: unless-stopped
     networks:
       - taiga-network
+    # This label tells Coolify to expose this service via the generated domain
+    labels:
+      coolify.enable: "true"
+
+  # Optional: A simple NGINX proxy to handle routing
+  nginx:
+    image: 'nginx:alpine'
+    container_name: taiga-nginx
+    depends_on:
+      - front
+      - back
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - taiga-network
+    # This label tells Coolify this is the service to expose
+    labels:
+      coolify.enable: "true"
 
 networks:
   taiga-network:
