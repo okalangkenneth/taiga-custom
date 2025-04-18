@@ -41,10 +41,10 @@ services:
       
       # Taiga configuration
       TAIGA_SECRET_KEY: j5_e4atjh#mo)f9olk@i!jkk=7e5!$b(yd!v6*0rx$7bq(9lwl
-      TAIGA_SITES_SCHEME: http
-      TAIGA_SITES_DOMAIN: "jn04co8w04ww0o8k4cgc8w0oc.95.217.187.120.sslip.io"
-      TAIGA_MEDIA_URL: "http://jn04co8w04ww0o8k4cgc8w0oc.95.217.187.120.sslip.io/media/"
-      TAIGA_STATIC_URL: "http://jn04co8w04ww0o8k4cgc8w0oc.95.217.187.120.sslip.io/static/"
+      TAIGA_SITES_SCHEME: http     
+      TAIGA_SITES_DOMAIN: "owcccc8cogsksgc0wkwgccwc.95.217.187.120.sslip.io"
+      TAIGA_MEDIA_URL: "http://owcccc8cogsksgc0wkwgccwc.95.217.187.120.sslip.io/media/"
+      TAIGA_STATIC_URL: "http://owcccc8cogsksgc0wkwgccwc.95.217.187.120.sslip.io/static/"
       
       # Admin user (for first login)
       TAIGA_ADMIN_USERNAME: admin
