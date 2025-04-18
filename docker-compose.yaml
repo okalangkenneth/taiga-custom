@@ -42,9 +42,9 @@ services:
       # Taiga configuration
       TAIGA_SECRET_KEY: j5_e4atjh#mo)f9olk@i!jkk=7e5!$b(yd!v6*0rx$7bq(9lwl
       TAIGA_SITES_SCHEME: http
-      TAIGA_SITES_DOMAIN: ${AUTO_GENERATED_DOMAIN}
-      TAIGA_MEDIA_URL: http://${AUTO_GENERATED_DOMAIN}/media/
-      TAIGA_STATIC_URL: http://${AUTO_GENERATED_DOMAIN}/static/
+      TAIGA_SITES_DOMAIN: okalangkenneth/taiga-custom:main-bg848owk4so0sc4cg0k44o8w
+      TAIGA_MEDIA_URL: http://okalangkenneth/taiga-custom:main-bg848owk4so0sc4cg0k44o8w/media/
+      TAIGA_STATIC_URL: http://okalangkenneth/taiga-custom:main-bg848owk4so0sc4cg0k44o8w/static/
       
       # Admin user (for first login)
       TAIGA_ADMIN_USERNAME: admin
