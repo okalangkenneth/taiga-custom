@@ -41,7 +41,7 @@ services:
       
       # Taiga configuration
       TAIGA_SECRET_KEY: j5_e4atjh#mo)f9olk@i!jkk=7e5!$b(yd!v6*0rx$7bq(9lwl
-      TAIGA_SITES_SCHEME: http     
+      TAIGA_SITES_SCHEME: http
       TAIGA_SITES_DOMAIN: "owcccc8cogsksgc0wkwgccwc.95.217.187.120.sslip.io"
       TAIGA_MEDIA_URL: "http://owcccc8cogsksgc0wkwgccwc.95.217.187.120.sslip.io/media/"
       TAIGA_STATIC_URL: "http://owcccc8cogsksgc0wkwgccwc.95.217.187.120.sslip.io/static/"
@@ -74,68 +74,76 @@ services:
       - taiga-network
     labels:
       coolify.enable: "true"
+      coolify.domain: "gkw00s08o4kc80sogqk88ocg.95.217.187.120.sslip.io"
+      traefik.enable: "true"
+      traefik.http.routers.taiga-front.rule: "Host(`gkw00s08o4kc80sogqk88ocg.95.217.187.120.sslip.io`)"
+      traefik.http.services.taiga-front.loadbalancer.server.port: "80"
 
-  # CHANGES to the nginx service:
+  # Modified nginx configuration for better proxy integration
   nginx:
-  image: 'nginx:alpine'
-  container_name: taiga-nginx
-  depends_on:
-    - front
-    - back
-  command: |
-    /bin/sh -c "echo 'server {
-        listen 80;
-        server_name _;
-        client_max_body_size 100M;
+    image: 'nginx:alpine'
+    container_name: taiga-nginx
+    depends_on:
+      - front
+      - back
+    command: |
+      /bin/sh -c "echo 'server {
+          listen 80;
+          server_name _;
+          client_max_body_size 100M;
 
-        # Frontend - root path
-        location / {
-            proxy_pass http://front:80;
-            proxy_set_header Host \$host;
-            proxy_set_header X-Real-IP \$remote_addr;
-        }
+          # Frontend - root path
+          location / {
+              proxy_pass http://front:80;
+              proxy_set_header Host \$host;
+              proxy_set_header X-Real-IP \$remote_addr;
+          }
 
-        # Backend API
-        location /api/ {
-            proxy_pass http://back:8000/api/;
-            proxy_set_header Host \$host;
-            proxy_set_header X-Real-IP \$remote_addr;
-        }
+          # Backend API
+          location /api/ {
+              proxy_pass http://back:8000/api/;
+              proxy_set_header Host \$host;
+              proxy_set_header X-Real-IP \$remote_addr;
+          }
 
-        # Admin
-        location /admin/ {
-            proxy_pass http://back:8000/admin/;
-            proxy_set_header Host \$host;
-            proxy_set_header X-Real-IP \$remote_addr;
-        }
+          # Admin
+          location /admin/ {
+              proxy_pass http://back:8000/admin/;
+              proxy_set_header Host \$host;
+              proxy_set_header X-Real-IP \$remote_addr;
+          }
 
-        # Static files
-        location /static/ {
-            proxy_pass http://back:8000/static/;
-            proxy_set_header Host \$host;
-            proxy_set_header X-Real-IP \$remote_addr;
-        }
+          # Static files
+          location /static/ {
+              proxy_pass http://back:8000/static/;
+              proxy_set_header Host \$host;
+              proxy_set_header X-Real-IP \$remote_addr;
+          }
 
-        # Media files
-        location /media/ {
-            proxy_pass http://back:8000/media/;
-            proxy_set_header Host \$host;
-            proxy_set_header X-Real-IP \$remote_addr;
-        }
+          # Media files
+          location /media/ {
+              proxy_pass http://back:8000/media/;
+              proxy_set_header Host \$host;
+              proxy_set_header X-Real-IP \$remote_addr;
+          }
 
-        # WebSockets
-        location /events {
-            proxy_pass http://back:8000/events;
-            proxy_http_version 1.1;
-            proxy_set_header Upgrade \$http_upgrade;
-            proxy_set_header Connection \"upgrade\";
-            proxy_set_header Host \$host;
-        }
-    }' > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
-  networks:
-    - taiga-network
-  labels:
-    coolify.enable: "true"
+          # WebSockets
+          location /events {
+              proxy_pass http://back:8000/events;
+              proxy_http_version 1.1;
+              proxy_set_header Upgrade \$http_upgrade;
+              proxy_set_header Connection \"upgrade\";
+              proxy_set_header Host \$host;
+          }
+      }' > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
+    networks:
+      - taiga-network
+    labels:
+      coolify.enable: "true"
+      coolify.domain: "owcccc8cogsksgc0wkwgccwc.95.217.187.120.sslip.io"
+      traefik.enable: "true"
+      traefik.http.routers.taiga-nginx.rule: "Host(`owcccc8cogsksgc0wkwgccwc.95.217.187.120.sslip.io`)"
+      traefik.http.services.taiga-nginx.loadbalancer.server.port: "80"
 
 networks:
   taiga-network:
